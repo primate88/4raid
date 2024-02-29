@@ -1,42 +1,34 @@
-import json
 import click
-from pathlib import Path
+from modules.filter_data import filter_data
+from modules.sample import print_sample
+from modules.download import download_data
 
-def filter_single_file(file_path):
-    """
-    Filters and transforms data from a single file.
-    """
-    output_data = []
-    with open(file_path, 'r', encoding='utf-8') as file:
-        for line in file:
-            try:
-                data = json.loads(line)
-                # Assuming you have a specific filtering condition based on the data structure
-                if data['posts'][0]['replies'] > 0 and (data['posts'][0]['replies'] != 1 or data['posts'][0]['com'] != "."):
-                    output_data.append(data)
-            except json.JSONDecodeError:
-                pass
-    return output_data
+@click.group()
+def cli():
+    """A CLI tool for performing operations: filter, sample, download."""
+    pass
 
-def process_file(file_path):
-    """
-    Process a single file.
-    """
-    output_path = f"{Path(file_path).stem}_filtered.jsonl"
-    filtered_data = filter_single_file(file_path)
-    with open(output_path, 'w', encoding='utf-8') as output_file:
-        for data in filtered_data:
-            json.dump(data, output_file)
-            output_file.write('\n')
-
-@click.command()
+@cli.command()
 @click.argument('file_path', type=click.Path(exists=True))
-def filter_data(file_path):
-    """
-    Filter the dataset.
-    """
-    process_file(file_path)
-    click.echo(f"Dataset filtered: {file_path} -> {Path(file_path).stem}_filtered.jsonl")
+def filter(file_path):
+    """Filter the dataset."""
+    # Since we're now dealing with a single file path argument, we pass it directly
+    filter_data(file=file_path)
 
-if __name__ == "__main__":
-    filter_data()
+@cli.command()
+@click.option('-R', '--random', is_flag=True, help='Print a random sample from the dataset.')
+@click.option('-n', '--number', type=int, help='Number of samples to print.')
+def sample(random, number):
+    """Print a sample from the dataset."""
+    print_sample(random=random, number=number)
+
+@cli.command()
+@click.option('--url', type=str, default=None, help='URL to download the file from.')
+@click.option('--md5', type=str, default=None, help='MD5 checksum for the file.')
+@click.option('-y', '--confirm', is_flag=True, default=False, help='Skip confirmation and download the file.')
+def download(url, md5, yes):
+    """Download the dataset."""
+    download_data(url, md5, yes)
+
+if __name__ == '__main__':
+    cli()
