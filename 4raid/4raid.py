@@ -21,8 +21,8 @@ def sample(random, number):
     perform_sampling(random=random, number=number)
 
 @cli.command()
-@click.option('--md5', help='MD5 hash of the dataset.')
-@click.option('--url', help='URL to download the dataset from.')
+@click.option('--url', default="https://zenodo.org/records/3606810/files/pol_0616-1119_labeled.tar.zst", help='URL to download the file from.')
+@click.option('--md5', default="3ad65640bf590d77af0f931045aef2e0", help='MD5 checksum for the file.')
 def download(md5, url):
     """Download the dataset."""
     perform_downloading(md5=md5, url=url)
